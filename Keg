@@ -1,0 +1,9 @@
+;; Keg
+
+(source gnu melpa)
+
+(package
+ (worktrunk
+  (recipe . (worktrunk :fetcher github :repo "conao3/worktrunk.el"))))
+
+(dev-dependency cort)
