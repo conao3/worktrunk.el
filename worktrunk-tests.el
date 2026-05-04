@@ -22,12 +22,59 @@
 
 ;; Test definitions for `worktrunk'.
 
-
+
 ;;; Code:
 
 (require 'cort)
 (require 'worktrunk)
 
+(cort-deftest worktrunk/build-command
+  '((:string=
+     (worktrunk--build-command '("switch" "feature"))
+     "wt switch feature")
+    (:string=
+     (worktrunk--build-command '("list" "--format=json"))
+     "wt list --format\\=json")
+    (:string=
+     (worktrunk--build-command '("switch" "--create" "foo bar"))
+     "wt switch --create foo\\ bar")))
+
+(cort-deftest worktrunk/default-buffer-name
+  '((:string=
+     (worktrunk-default-buffer-name "switch")
+     "*worktrunk switch*")
+    (:string=
+     (worktrunk-default-buffer-name "merge")
+     "*worktrunk merge*")))
+
+(cort-deftest worktrunk/list-entry
+  '((:equal
+     (worktrunk-list--entry
+      '((branch . "master")
+        (path . "/tmp/foo")
+        (commit (short_sha . "abc1234") (message . "init"))
+        (is_current . t)))
+     '("master" ["master" "*" "abc1234" "/tmp/foo" "init"]))
+    (:equal
+     (worktrunk-list--entry
+      '((branch . "feature")
+        (path . "/tmp/feature")
+        (commit (short_sha . "deadbee") (message . "wip"))
+        (is_current . :json-false)))
+     '("feature" ["feature" "" "deadbee" "/tmp/feature" "wip"]))
+    (:equal
+     (worktrunk-list--entry
+      '((branch)
+        (path)
+        (commit)
+        (is_current . :json-false)))
+     '("(detached)" ["(detached)" "" "" "" ""]))))
+
+(cort-deftest worktrunk/known-backend-handlers
+  '((:eq (fboundp 'worktrunk--run-shell) t)
+    (:eq (fboundp 'worktrunk--run-term) t)
+    (:eq (fboundp 'worktrunk--run-vterm) t)
+    (:eq (fboundp 'worktrunk--run-eat) t)))
 
 ;; (provide 'worktrunk-tests)
 
