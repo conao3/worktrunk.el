@@ -91,7 +91,7 @@ Signal an error when the process exits with a non-zero status."
     (let ((status (apply #'call-process worktrunk-executable nil
                          (current-buffer) nil args)))
       (unless (eq status 0)
-        (error "wt %s failed (exit %S): %s"
+        (error "Failed to run wt %s (exit %S): %s"
                (mapconcat #'identity args " ")
                status
                (string-trim (buffer-string))))

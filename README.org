@@ -26,18 +26,84 @@
 * Description
 [[https://github.com/conao3/worktrunk.el][https://raw.githubusercontent.com/conao3/files/master/blob/worktrunk.el/worktrunk.gif]]
 
-Worktrunc integration.
+Emacs integration for [[https://github.com/max-sixty/worktrunk][worktrunk]] — the =wt= command-line
+tool for managing git worktrees in parallel AI agent workflows.
+
+worktrunk.el wraps the =wt= subcommands (=switch=, =list=, =remove=,
+=merge=, =step ...=) so they can be driven from inside Emacs.
+Read-only data (the worktree list, branch completion candidates) is
+fetched via =wt list --format=json= and consumed directly in Lisp.
+Interactive subcommands run in an Emacs terminal buffer; the terminal
+implementation is selectable.
 
 * Install
-Sample install code using [[https://github.com/conao3/leaf.el][leaf.el]].
+=wt= itself must be installed and on =PATH=. Then install =worktrunk.el=
+through your preferred package manager. Sample using [[https://github.com/conao3/leaf.el][leaf.el]]:
 
 #+begin_src emacs-lisp
   (leaf worktrunk :ensure t)
 #+end_src
 
 * Usage
+** Worktree list
+=M-x worktrunk-list= opens a =tabulated-list-mode= buffer showing each
+worktree with its branch, current marker, HEAD, path, and last commit
+message. The buffer is rebuilt from =wt list --format=json= on every
+refresh.
+
+Default keybindings:
+
+| Key   | Command                  | Description                                    |
+|-------+--------------------------+------------------------------------------------|
+| =RET= | =worktrunk-list-find-file= | Open the worktree path with =dired=          |
+| =s=   | =worktrunk-list-switch=    | Switch to the worktree (runs =wt switch=)    |
+| =c=   | =worktrunk-create=         | Create a new branch + worktree               |
+| =D=   | =worktrunk-list-remove=    | Remove the worktree (runs =wt remove=)       |
+| =m=   | =worktrunk-list-merge=     | Merge the worktree into the default branch   |
+| =g=   | =worktrunk-list-refresh=   | Reload the table                             |
+
+** Top-level commands
+| Command                     | Description                                                  |
+|-----------------------------+--------------------------------------------------------------|
+| =worktrunk-switch=            | Switch to a worktree by branch name (with completion)        |
+| =worktrunk-create=            | Create a new branch and worktree (=wt switch --create=)    |
+| =worktrunk-remove=            | Remove a worktree (=wt remove=)                            |
+| =worktrunk-merge=             | Merge current branch into a target branch (=wt merge=)     |
+| =worktrunk-step-commit=       | =wt step commit=                                           |
+| =worktrunk-step-squash=       | =wt step squash=                                           |
+| =worktrunk-step-rebase=       | =wt step rebase=                                           |
+| =worktrunk-step-push=         | =wt step push=                                             |
+| =worktrunk-step-diff=         | =wt step diff=                                             |
+
+A prefix argument to =worktrunk-switch= turns it into a "create new
+branch" prompt (=--create= with optional =--base=). A prefix argument
+to =worktrunk-remove= passes =--force=.
 
 * Customize
+** =worktrunk-executable=
+Path to the =wt= binary. Defaults to ="wt"=.
+
+** =worktrunk-terminal-backend=
+Terminal implementation used to run interactive =wt= subcommands.
+
+| Value    | Mode used     | Notes                                |
+|----------+---------------+--------------------------------------|
+| ='shell= | =shell-mode=  | Default. No additional dependencies. |
+| ='term=  | =term-mode=   | Built-in terminal emulator.          |
+| ='vterm= | =vterm-mode=  | Requires the =vterm= package.        |
+| ='eat=   | =eat-mode=    | Requires the =eat= package.          |
+
+External packages are loaded on demand and an error is signalled if
+they are unavailable.
+
+#+begin_src emacs-lisp
+  (setopt worktrunk-terminal-backend 'vterm)
+#+end_src
+
+** =worktrunk-buffer-name-function=
+Function returning the terminal buffer name for a subcommand. Called
+with one string argument (the =wt= subcommand). Defaults to
+=worktrunk-default-buffer-name= which returns =*worktrunk SUBCOMMAND*=.
 
 * Information
 ** Community
