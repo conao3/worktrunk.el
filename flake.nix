@@ -16,7 +16,7 @@
 
       perSystem = {system, ...}: let
         overlay = _: prev: let
-          emacs = prev.emacs30;
+          emacs = prev.emacs31;
         in {
           inherit emacs;
         };
