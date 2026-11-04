@@ -14,20 +14,16 @@
 
       imports = [inputs.treefmt-nix.flakeModule];
 
-      perSystem = {system, ...}: let
-        overlay = _: prev: let
-          emacs = prev.emacs31;
-        in {
-          inherit emacs;
-        };
-        pkgs = import inputs.nixpkgs {
-          inherit system;
-          overlays = [overlay];
-        };
+      perSystem = {
+        pkgs,
+        system,
+        ...
+      }: let
+        emacs = pkgs.emacs31;
       in {
         devShells.default = pkgs.mkShell {
           packages = [
-            pkgs.emacs
+            emacs
             pkgs.gnumake
             inputs.keg.packages.${system}.default
           ];
